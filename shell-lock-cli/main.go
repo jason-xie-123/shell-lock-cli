@@ -84,8 +84,6 @@ func main() {
 			cmd.Stderr = os.Stderr
 
 			if err := cmd.Run(); err != nil {
-				fmt.Println("Error while executing command: ", err)
-
 				if (tryLock && lockTrySuccess) || !tryLock {
 					if fileLock != nil {
 						fileLock.Unlock()
