@@ -27,7 +27,7 @@ export -f test_export_function
 test_func() {
     local CURRENT_SIGN=$1
     "$SHELL_FOLDER/shell-lock-by-ps.sh" -mutex-name test-lock-3 -command "test_export_function \"$CURRENT_SIGN\""
-    echo EXIT-CODE: $?
+    echo "EXIT-CODE [$CURRENT_SIGN]: $?"
 }
 
 if [ "$(is_windows_platform)" != "true" ]; then

@@ -66,17 +66,21 @@ func main() {
 
 				lockTrySuccess, err = fileLock.TryLock()
 				if err != nil {
-					fmt.Printf("Error while locking try lock %s: %+v\n", lockFile, err)
-					os.Exit(2)
+					return fmt.Errorf("failed to acquire lock: err=%w", err)
+				}
+
+				if !lockTrySuccess {
+					fmt.Println("[WARN] failed to acquire lock, another process is holding the lock...")
 				}
 			} else {
 				fileLock = flock.New(lockFile)
 
 				err = fileLock.Lock()
 				if err != nil {
-					fmt.Printf("Error while locking %s: %+v\n", lockFile, err)
-					os.Exit(2)
+					return fmt.Errorf("failed to acquire lock: err=%w", err)
 				}
+
+				fmt.Println("[TRACE] lock acquired")
 			}
 
 			cmd := exec.Command(bashPath, "-c", command)
@@ -109,7 +113,7 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Printf("[ERROR] %s", err.Error())
 		os.Exit(1)
 	}
 }

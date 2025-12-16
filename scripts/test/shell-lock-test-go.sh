@@ -32,10 +32,10 @@ test_func() {
 
     COMMAND_PARAMS="test_export_function $ESCAPED_CURRENT_SIGN"
     ESCAPED_COMMAND_PARAMS=$(printf '%q' "$COMMAND_PARAMS")
-    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --bash-path=\"$BASH_PATH\" "
-    echo exec: "$COMMAND"
+    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --try-lock --bash-path=\"$BASH_PATH\" "
+    # echo exec: "$COMMAND"
     eval "$COMMAND"
-    echo EXIT-CODE: $?
+    echo "EXIT-CODE [$CURRENT_SIGN]: $?"
 }
 
 calc_shell_lock_cli_path() {

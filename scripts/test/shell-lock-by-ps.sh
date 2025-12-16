@@ -16,15 +16,9 @@ PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
 exec_command() {
     BASH_PATH=$(get_git_bash_path)
     BASH_PATH=$(cygpath -w "$BASH_PATH")
-    # shellcheck disable=SC2001
-    # ESCAPED_SHELL_COMMAND=$(echo "$SHELL_COMMAND" | sed 's/"/\\\\\\"/g')
-    # echo SHELL_COMMAND:$SHELL_COMMAND
-    # echo ESCAPED_SHELL_COMMAND:$ESCAPED_SHELL_COMMAND
     ESCAPED_SHELL_COMMAND=$(printf '%q' "$SHELL_COMMAND")
-    # ESCAPED_SHELL_COMMAND=$(printf '%q' "$ESCAPED_SHELL_COMMAND")
-    # echo "ESCAPED_SHELL_COMMAND: $ESCAPED_SHELL_COMMAND"
     COMMAND="powershell.exe -ExecutionPolicy Bypass -File \"$SHELL_FOLDER/shell-lock-by-ps.ps1\" -MutexName \"Global\\$MUTEX_NAME\" -GitBashPath \"$BASH_PATH\" -ShellCommand $ESCAPED_SHELL_COMMAND"
-    echo exec: "$COMMAND"
+    # echo exec: "$COMMAND"
     eval "$COMMAND"
     RESPONSE_CODE=$?
     exit $RESPONSE_CODE
