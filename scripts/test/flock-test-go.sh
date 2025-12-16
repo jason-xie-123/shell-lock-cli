@@ -28,10 +28,11 @@ test_func() {
     local CURRENT_SIGN=$1
     BASH_PATH=$(get_git_bash_path)
 
-    COMMAND_PARAMS="test_export_function \"$CURRENT_SIGN\""
-    # shellcheck disable=SC2001
-    ESCAPED_SHELL_COMMAND_PARAMS=$(echo "$COMMAND_PARAMS" | sed 's/"/\\\"/g')
-    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=\"$ESCAPED_SHELL_COMMAND_PARAMS\" --lock-file=\"$SHELL_FOLDER/flock-test-go.lock\" --bash-path=\"$BASH_PATH\" "
+    ESCAPED_CURRENT_SIGN=$(printf '%q' "$CURRENT_SIGN")
+
+    COMMAND_PARAMS="test_export_function $ESCAPED_CURRENT_SIGN"
+    ESCAPED_COMMAND_PARAMS=$(printf '%q' "$COMMAND_PARAMS")
+    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/flock-test-go.lock\" --bash-path=\"$BASH_PATH\" "
     echo exec: "$COMMAND"
     eval "$COMMAND"
     echo EXIT-CODE: $?
@@ -99,7 +100,7 @@ calc_shell_lock_cli_path SHELL_LOCK_CLI_PATH
 start_time_1=$(date +%s)
 
 for i in {1..10}; do
-    test_func "--//\\$i\\//--" &
+    test_func "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
 done
 
 wait

@@ -41,7 +41,7 @@ fi
 start_time_1=$(date +%s)
 
 for i in {1..10}; do
-    test_func "--//\\$i\\//--" &
+    test_func "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
 done
 
 wait
