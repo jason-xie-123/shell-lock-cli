@@ -5,7 +5,7 @@ SHELL_FOLDER=$(
     cd "$(dirname "$0")" || exit
     pwd
 )
-PROJECT_FOLDER=$SHELL_FOLDER/../../..
+PROJECT_FOLDER=$SHELL_FOLDER/../..
 
 cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
 
@@ -77,6 +77,14 @@ while true; do
         ;;
     esac
 done
+
+if [ "$(is_windows_platform)" != "true" ]; then
+    echo ""
+    echo "[ERROR]: This script only supports Windows platform"
+    echo ""
+
+    exit 1
+fi
 
 exec_command
 

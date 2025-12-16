@@ -5,7 +5,7 @@ SHELL_FOLDER=$(
     cd "$(dirname "$0")" || exit
     pwd
 )
-PROJECT_FOLDER=$SHELL_FOLDER/../../..
+PROJECT_FOLDER=$SHELL_FOLDER/../..
 
 cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
 
@@ -36,7 +36,6 @@ test_func() {
     eval "$COMMAND"
     echo EXIT-CODE: $?
 }
-
 
 calc_shell_lock_cli_path() {
     CURRENT_BINARY_PATH=""
@@ -94,7 +93,6 @@ calc_shell_lock_cli_path() {
 
     eval "$1=\"$CURRENT_BINARY_PATH\""
 }
-
 
 calc_shell_lock_cli_path SHELL_LOCK_CLI_PATH
 

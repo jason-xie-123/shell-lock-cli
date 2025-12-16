@@ -3,6 +3,55 @@
 # set -e
 # set -x
 
+
+
+
+check_realpath_exist() {
+    if [ "$(is_darwin_platform)" == "true" ]; then
+        if ! command -v grealpath &>/dev/null; then
+            echo "[WARN]: can not find grealpath command and install grealpath command"
+
+            brew install coreutils
+        fi
+
+        if ! command -v grealpath &>/dev/null; then
+            echo ""
+            echo ""
+            echo "[ERROR]: can not find grealpath command"
+            echo ""
+            echo ""
+
+            exit 1
+        fi
+
+        echo ""
+        echo ""
+        echo "grealpath Path: $(get_command_path grealpath)"
+        echo grealpath version
+        grealpath --version
+        echo ""
+        echo ""
+    elif [ "$(is_windows_platform)" == "true" ]; then
+        if ! command -v realpath &>/dev/null; then
+            echo ""
+            echo ""
+            echo "[ERROR]: can not find realpath command"
+            echo ""
+            echo ""
+
+            exit 1
+        fi
+
+        echo ""
+        echo ""
+        echo "realpath Path: $(get_command_path realpath)"
+        echo realpath version
+        realpath --version
+        echo ""
+        echo ""
+    fi
+}
+
 check_gh_exist() {
     if ! command -v gh &>/dev/null; then
         if [ "$(uname)" = "Darwin" ]; then
@@ -132,11 +181,7 @@ is_darwin_platform() {
 }
 
 check_windows_os_info_exist() {
-    if [ "$(uname)" = "Darwin" ]; then
-        echo ""
-        echo "[WARN]: windows-os-info command only support Windows"
-        echo ""
-    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" || -n "$WINDIR" ]]; then
+    if [ "$(is_windows_platform)" == "true" ]; then
         if ! command -v windows-os-info &>/dev/null; then
             echo "[WARN]: can not find windows-os-info command and install windows-os-info command"
 
@@ -188,12 +233,16 @@ check_windows_os_info_exist() {
 
             exit 1
         fi
+    else
+        echo ""
+        echo "[WARN]: windows-os-info command only support Windows"
+        echo ""
     fi
 }
 
 get_os_architecture() {
     CURRENT_OS_ARCHITECTURE=""
-    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" || -n "$WINDIR" ]]; then
+     if [ "$(is_windows_platform)" == "true" ]; then
         # win 11 开始系统已经标记 wmic 命令为废弃方法，在某些 win11 设备上不存在 wmic 命令
         # OS_ARCHITECTURE_RESULT=$(wmic os get osarchitecture)
         check_windows_os_info_exist
@@ -222,3 +271,64 @@ get_os_architecture() {
 
     eval "$1=\"$CURRENT_OS_ARCHITECTURE\""
 }
+
+get_command_path() {
+    if [ -n "$1" ]; then
+        if command -v "$1" &>/dev/null; then
+            if [ "$(uname)" = "Darwin" ]; then
+                transfer_path_to_unix "$(which "$1")"
+            elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" || -n "$WINDIR" ]]; then
+                transfer_path_to_unix "$(where "$1")"
+            fi
+        else
+            echo ""
+        fi
+    else
+        echo ""
+    fi
+}
+
+
+transfer_path_to_unix() {
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" || -n "$WINDIR" ]]; then
+        win_path=$1
+        if [ "$(check_string_is_not_empty "$win_path")" = "false" ]; then
+            echo "$win_path"
+        else
+            unix_path=$(cygpath "$win_path")
+            echo "$unix_path"
+        fi
+    else
+        echo "$1"
+    fi
+}
+
+export -f transfer_path_to_unix
+
+get_git_bash_path() {
+    if [ "$(is_windows_platform)" == "true" ]; then
+        GIT_PATH=$(reg query "HKLM\SOFTWARE\GitForWindows" //v InstallPath 2>&1 | grep "InstallPath" | sed -r 's/.*InstallPath\s+REG_SZ\s+//')
+        if [ "$(check_folder_exist "$GIT_PATH")" = "true" ]; then
+            # shellcheck disable=SC2028
+            echo "$GIT_PATH\usr\bin\bash.exe"
+        else
+            where bash
+        fi
+    else
+        which bash
+    fi
+}
+
+export -f get_git_bash_path
+
+check_realpath_exist
+
+calc_real_path() {
+    if [ "$(uname)" = "Darwin" ]; then
+        grealpath "$1"
+    else
+        realpath "$1"
+    fi
+}
+
+export -f calc_real_path

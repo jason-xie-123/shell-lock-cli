@@ -5,7 +5,7 @@ SHELL_FOLDER=$(
     cd "$(dirname "$0")" || exit
     pwd
 )
-PROJECT_FOLDER=$SHELL_FOLDER/../../..
+PROJECT_FOLDER=$SHELL_FOLDER/../..
 
 cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
 
@@ -29,6 +29,14 @@ test_func() {
     "$SHELL_FOLDER/flock-by-ps.sh" -mutex-name test-lock-3 -command "test_export_function \"$CURRENT_SIGN\""
     echo EXIT-CODE: $?
 }
+
+if [ "$(is_windows_platform)" != "true" ]; then
+    echo ""
+    echo "[ERROR]: This script only supports Windows platform"
+    echo ""
+
+    exit 1
+fi
 
 start_time_1=$(date +%s)
 

@@ -11,6 +11,7 @@ cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
 
 # shellcheck source=/dev/null
 source "$PROJECT_FOLDER/scripts/base/env.sh"
+PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
 
 usage() {
     echo "Usage:"

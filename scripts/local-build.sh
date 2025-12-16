@@ -9,6 +9,10 @@ PROJECT_FOLDER=$SHELL_FOLDER/..
 
 cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
 
+# shellcheck source=/dev/null
+source "$PROJECT_FOLDER/scripts/base/env.sh"
+PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+
 process() {
     COMMAND="\"$PROJECT_FOLDER/scripts/build/clean-build-cache.sh\""
     echo exec: "$COMMAND"
