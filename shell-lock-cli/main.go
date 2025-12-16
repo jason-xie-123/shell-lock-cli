@@ -80,7 +80,7 @@ func main() {
 					return fmt.Errorf("failed to acquire lock: err=%w", err)
 				}
 
-				fmt.Println("[TRACE] lock acquired")
+				// fmt.Println("[TRACE] lock acquired")
 			}
 
 			cmd := exec.Command(bashPath, "-c", command)
