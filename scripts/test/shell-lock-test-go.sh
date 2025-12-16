@@ -14,7 +14,7 @@ source "$PROJECT_FOLDER/scripts/base/env.sh"
 PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
 
 test_export_function() {
-    local CURRENT_SIGN=$1
+   local CURRENT_SIGN=$(echo "$1" | base64 --decode)
     echo "test_export_function [$CURRENT_SIGN]: start ......"
     sleep 1
     echo "test_export_function [$CURRENT_SIGN]: finish"
@@ -26,14 +26,11 @@ export -f test_export_function
 
 test_func() {
     local CURRENT_SIGN=$1
+    local ENCODED_CURRENT_SIGN=$(echo "$1" | base64)
     BASH_PATH=$(get_git_bash_path)
 
-    ESCAPED_CURRENT_SIGN=$(printf '%q' "$CURRENT_SIGN")
-
-    COMMAND_PARAMS="test_export_function $ESCAPED_CURRENT_SIGN"
-    ESCAPED_COMMAND_PARAMS=$(printf '%q' "$COMMAND_PARAMS")
-    # COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --try-lock --bash-path=\"$BASH_PATH\""
-    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --bash-path=\"$BASH_PATH\""
+    # COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=\"test_export_function $ENCODED_CURRENT_SIGN\" --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --try-lock --bash-path=\"$BASH_PATH\""
+    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=\"test_export_function $ENCODED_CURRENT_SIGN\" --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --bash-path=\"$BASH_PATH\""
     # echo exec: "$COMMAND"
     eval "$COMMAND"
     echo "EXIT-CODE [$CURRENT_SIGN]: $?"

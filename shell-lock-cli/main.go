@@ -83,6 +83,8 @@ func main() {
 				// fmt.Println("[TRACE] lock acquired")
 			}
 
+			// fmt.Printf("[INFO] executing command: %s\n", command)
+
 			cmd := exec.Command(bashPath, "-c", command)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr

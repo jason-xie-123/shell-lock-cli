@@ -14,7 +14,7 @@ source "$PROJECT_FOLDER/scripts/base/env.sh"
 PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
 
 test_export_function() {
-    local CURRENT_SIGN=$1
+    local CURRENT_SIGN=$(echo "$1" | base64 --decode)
     echo "test_export_function [$CURRENT_SIGN]: start ......"
     sleep 1
     echo "test_export_function [$CURRENT_SIGN]: finish"
@@ -26,8 +26,10 @@ export -f test_export_function
 
 test_func() {
     local CURRENT_SIGN=$1
-    ESCAPED_CURRENT_SIGN=$(printf '%q' "$CURRENT_SIGN")
-    "$SHELL_FOLDER/shell-lock-by-ps.sh" -mutex-name test-lock-3 -command "test_export_function \"$ESCAPED_CURRENT_SIGN\""
+    local ENCODED_CURRENT_SIGN=$(echo "$1" | base64)
+    COMMAND="\"$SHELL_FOLDER/shell-lock-by-ps.sh\" -mutex-name test-lock-3 -command \"test_export_function $ENCODED_CURRENT_SIGN\""
+    # echo exec: "$COMMAND"
+    eval "$COMMAND"
     echo "EXIT-CODE [$CURRENT_SIGN]: $?"
 }
 
