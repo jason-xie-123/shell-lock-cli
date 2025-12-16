@@ -222,4 +222,3 @@ get_os_architecture() {
 
     eval "$1=\"$CURRENT_OS_ARCHITECTURE\""
 }
-
