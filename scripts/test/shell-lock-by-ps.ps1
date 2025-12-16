@@ -22,7 +22,7 @@ if (-not $isNewMutex) {
 }
 
 try {
-    #    Write-output "Executing shell command: $ShellCommand"
+    # Write-output "Executing shell command: $ShellCommand"
 
    $arguments = "-c `"$ShellCommand`""
    
