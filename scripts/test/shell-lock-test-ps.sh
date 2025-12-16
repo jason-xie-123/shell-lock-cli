@@ -26,7 +26,7 @@ export -f test_export_function
 
 test_func() {
     local CURRENT_SIGN=$1
-    "$SHELL_FOLDER/flock-by-ps.sh" -mutex-name test-lock-3 -command "test_export_function \"$CURRENT_SIGN\""
+    "$SHELL_FOLDER/shell-lock-by-ps.sh" -mutex-name test-lock-3 -command "test_export_function \"$CURRENT_SIGN\""
     echo EXIT-CODE: $?
 }
 
@@ -51,7 +51,7 @@ execution_time_1=$((end_time_1 - start_time_1))
 
 echo ""
 echo "----------------------------------------"
-echo "Execution time [flock-test-ps]: $execution_time_1 seconds"
+echo "Execution time [shell-lock-test-ps]: $execution_time_1 seconds"
 echo "----------------------------------------"
 echo ""
 

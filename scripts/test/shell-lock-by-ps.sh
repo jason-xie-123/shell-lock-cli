@@ -17,10 +17,13 @@ exec_command() {
     BASH_PATH=$(get_git_bash_path)
     BASH_PATH=$(cygpath -w "$BASH_PATH")
     # shellcheck disable=SC2001
-    ESCAPED_SHELL_COMMAND=$(echo "$SHELL_COMMAND" | sed 's/"/\\\\\\"/g')
+    # ESCAPED_SHELL_COMMAND=$(echo "$SHELL_COMMAND" | sed 's/"/\\\\\\"/g')
     # echo SHELL_COMMAND:$SHELL_COMMAND
     # echo ESCAPED_SHELL_COMMAND:$ESCAPED_SHELL_COMMAND
-    COMMAND="powershell.exe -ExecutionPolicy Bypass -File \"$SHELL_FOLDER/flock-by-ps.ps1\" -MutexName \"Global\\$MUTEX_NAME\" -GitBashPath \"$BASH_PATH\" -ShellCommand \"$ESCAPED_SHELL_COMMAND\""
+    ESCAPED_SHELL_COMMAND=$(printf '%q' "$SHELL_COMMAND")
+    # ESCAPED_SHELL_COMMAND=$(printf '%q' "$ESCAPED_SHELL_COMMAND")
+    # echo "ESCAPED_SHELL_COMMAND: $ESCAPED_SHELL_COMMAND"
+    COMMAND="powershell.exe -ExecutionPolicy Bypass -File \"$SHELL_FOLDER/shell-lock-by-ps.ps1\" -MutexName \"Global\\$MUTEX_NAME\" -GitBashPath \"$BASH_PATH\" -ShellCommand $ESCAPED_SHELL_COMMAND"
     echo exec: "$COMMAND"
     eval "$COMMAND"
     RESPONSE_CODE=$?
@@ -36,10 +39,7 @@ usage() {
     echo "  SHELL_COMMAND: shell command"
     echo ""
     echo "Example:"
-    echo "  $(basename "$0") -mutex-name MyUniqueMutexName -command \"ls\""
-    echo "  $(basename "$0") -mutex-name MyUniqueMutexName -command \"$PROJECT_FOLDER/scripts/check/check-commands-exist.sh\""
-    echo "  $(basename "$0") -mutex-name MyUniqueMutexName -command \"test_export_function\""
-    echo "  $(basename "$0") -mutex-name MyUniqueMutexName -command \"test_export_function_with_parameter \\\"aaa\\\" \\\"bbb cccc\\\"\""
+    echo "  $(basename "$0") -mutex-name MyUniqueMutexName -command \"echo start && sleep 1 && ls && echo end\""
 
     exit 1
 }

@@ -32,7 +32,7 @@ test_func() {
 
     COMMAND_PARAMS="test_export_function $ESCAPED_CURRENT_SIGN"
     ESCAPED_COMMAND_PARAMS=$(printf '%q' "$COMMAND_PARAMS")
-    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/flock-test-go.lock\" --bash-path=\"$BASH_PATH\" "
+    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=$ESCAPED_COMMAND_PARAMS --lock-file=\"$SHELL_FOLDER/shell-lock-test-go.lock\" --bash-path=\"$BASH_PATH\" "
     echo exec: "$COMMAND"
     eval "$COMMAND"
     echo EXIT-CODE: $?
@@ -110,7 +110,7 @@ execution_time_1=$((end_time_1 - start_time_1))
 
 echo ""
 echo "----------------------------------------"
-echo "Execution time [flock-test-go]: $execution_time_1 seconds"
+echo "Execution time [shell-lock-test-go]: $execution_time_1 seconds"
 echo "----------------------------------------"
 echo ""
 
