@@ -3,9 +3,6 @@
 # set -e
 # set -x
 
-
-
-
 check_realpath_exist() {
     if [ "$(is_darwin_platform)" == "true" ]; then
         if ! command -v grealpath &>/dev/null; then
@@ -242,7 +239,7 @@ check_windows_os_info_exist() {
 
 get_os_architecture() {
     CURRENT_OS_ARCHITECTURE=""
-     if [ "$(is_windows_platform)" == "true" ]; then
+    if [ "$(is_windows_platform)" == "true" ]; then
         # win 11 开始系统已经标记 wmic 命令为废弃方法，在某些 win11 设备上不存在 wmic 命令
         # OS_ARCHITECTURE_RESULT=$(wmic os get osarchitecture)
         check_windows_os_info_exist
@@ -287,7 +284,6 @@ get_command_path() {
         echo ""
     fi
 }
-
 
 transfer_path_to_unix() {
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" || -n "$WINDIR" ]]; then
