@@ -107,7 +107,7 @@ calc_shell_lock_cli_path() {
 
 usage() {
     echo "Usage:"
-    echo "  $(basename "$0") -operation [OPERATION] -distribution-channel [DISTRIBUTION_CHANNEL] -api-env [API_ENV] -arch-type [ARCH_TYPE] -garble-seed [GARBLE_SEED] -garble-debug-dir [GARBLE_DEBUG_DIR] -garble-panic-file [GARBLE_PANIC_FILE] [--flag-support-windows-signature] -windows-remote-ssh-config-name [WINDOWS_REMOTE_SSH_CONFIG_NAME] -support-code-obfuscation [SUPPORT_CODE_OBFUSCATION] -support-windows-resource [SUPPORT_WINDOWS_RESOURCE] -support-stripped [IS_SUPPORT_STRIPPED] -support-stack-canary [IS_SUPPORT_STACK_CANARY] [--flag-support-race-check] [--flag-cgo-sqlite] -cgo-solution [CGO_SOLUTION] [--flag-support-nupkg] [--flag-support-sync-to-local-project] [--flag-for-distribution] -target-folder [TARGET_FOLDER] [-h]"
+    echo "  $(basename "$0") -operation [OPERATION] [-h]"
     echo "Description:"
     echo "  -operation: operation, support: test_export_function_by_go / test_export_function_by_ps"
     echo ""
