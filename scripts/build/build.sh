@@ -14,12 +14,7 @@ TARGET_NAME="shell-lock-cli"
 RELEASE_DIR="$PROJECT_ROOT/release"
 BUILD_PARAMETER="-ldflags '-w -s' -trimpath"
 
-mkdir -p \ \
-    "$RELEASE_DIR/windows-amd64" \ \
-    "$RELEASE_DIR/windows-386" \ \
-    "$RELEASE_DIR/windows-arm64" \ \
-    "$RELEASE_DIR/darwin-amd64" \ \
-    "$RELEASE_DIR/darwin-arm64"
+mkdir -p \  "$RELEASE_DIR/windows-amd64" \  "$RELEASE_DIR/windows-386" \  "$RELEASE_DIR/windows-arm64" \  "$RELEASE_DIR/darwin-amd64" \  "$RELEASE_DIR/darwin-arm64"
 
 log_info "Compiling binaries for multiple platforms..."
 

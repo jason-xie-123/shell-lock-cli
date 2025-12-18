@@ -26,19 +26,19 @@ USAGE
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h | --h | h | -help | --help | help | -H | --H | HELP)
-                usage
-                ;;
-            -token)
-                if [[ $# -ge 2 ]]; then
-                    GH_TOKEN="$2"
-                    shift
-                fi
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                usage
-                ;;
+        -h | --h | h | -help | --help | help | -H | --H | HELP)
+            usage
+            ;;
+        -token)
+            if [[ $# -ge 2 ]]; then
+                GH_TOKEN="$2"
+                shift
+            fi
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            usage
+            ;;
         esac
         shift
     done

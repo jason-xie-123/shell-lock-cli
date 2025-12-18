@@ -89,12 +89,12 @@ check_string_is_not_empty() {
 
 format_bool_value() {
     case "$1" in
-        true | True | TRUE | tRUE)
-            echo "true"
-            ;;
-        *)
-            echo "false"
-            ;;
+    true | True | TRUE | tRUE)
+        echo "true"
+        ;;
+    *)
+        echo "false"
+        ;;
     esac
 }
 
@@ -366,18 +366,18 @@ get_os_architecture() {
         result=$(windows-os-info --action=os_arch)
 
         case "$result" in
-            arm64) architecture="ARM64" ;;
-            x86) architecture="X86" ;;
-            x64) architecture="X64" ;;
-            *) architecture="unknown" ;;
+        arm64) architecture="ARM64" ;;
+        x86) architecture="X86" ;;
+        x64) architecture="X64" ;;
+        *) architecture="unknown" ;;
         esac
     elif [[ $(is_darwin_platform) == "true" ]]; then
         local result
         result=$(uname -m)
 
         case "$result" in
-            x86_64) architecture="X64" ;;
-            arm64) architecture="ARM64" ;;
+        x86_64) architecture="X64" ;;
+        arm64) architecture="ARM64" ;;
         esac
     fi
 
@@ -390,7 +390,7 @@ get_git_bash_path() {
         git_path=$(reg query "HKLM\SOFTWARE\GitForWindows" //v InstallPath 2>&1 | grep "InstallPath" | sed -r 's/.*InstallPath\s+REG_SZ\s+//')
 
         if [[ $(check_folder_exist "$git_path") == "true" ]]; then
-            echo "$git_path\\usr\\bin\\bash.exe"
+            printf "%s\n" "$git_path\\usr\\bin\\bash.exe"
         else
             where bash
         fi
