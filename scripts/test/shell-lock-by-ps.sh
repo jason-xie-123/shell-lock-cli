@@ -1,86 +1,72 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/../..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+source "$PROJECT_ROOT/scripts/base/env.sh"
 
-exec_command() {
-    BASH_PATH=$(get_git_bash_path)
-    BASH_PATH=$(cygpath -w "$BASH_PATH")
-    ESCAPED_SHELL_COMMAND=$(printf '%q' "$SHELL_COMMAND")
-    COMMAND="powershell.exe -ExecutionPolicy Bypass -File \"$SHELL_FOLDER/shell-lock-by-ps.ps1\" -MutexName \"Global\\$MUTEX_NAME\" -GitBashPath \"$BASH_PATH\" -ShellCommand $ESCAPED_SHELL_COMMAND"
-    # echo exec: "$COMMAND"
-    eval "$COMMAND"
-    RESPONSE_CODE=$?
-    exit $RESPONSE_CODE
-}
+MUTEX_NAME=""
+SHELL_COMMAND=""
 
 usage() {
-    echo "Usage:"
-    echo "  $(basename "$0") [-mutex-name MUTEX_NAME] [-command SHELL_COMMAND] [-h]"
-    echo ""
-    echo "Description:"
-    echo "  MUTEX_NAME: mutex name"
-    echo "  SHELL_COMMAND: shell command"
-    echo ""
-    echo "Example:"
-    echo "  $(basename "$0") -mutex-name MyUniqueMutexName -command \"echo start && sleep 1 && ls && echo end\""
+    cat <<'USAGE'
+Usage:
+  shell-lock-by-ps.sh [-mutex-name MUTEX_NAME] [-command SHELL_COMMAND] [-h]
 
+Description:
+  MUTEX_NAME    mutex name
+  SHELL_COMMAND shell command
+USAGE
     exit 1
 }
 
-while true; do
-    if [ -z "$1" ]; then
-        break
-    fi
-    case "$1" in
-    -h | --h | h | -help | --help | help | -H | --H | HELP)
-        usage
-        ;;
-    -mutex-name)
-        if [ $# -ge 2 ]; then
-            MUTEX_NAME=$2
-            shift 2
-        else
-            shift 1
-        fi
-        ;;
-    -command)
-        if [ $# -ge 2 ]; then
-            SHELL_COMMAND=$2
-            shift 2
-        else
-            shift 1
-        fi
-        ;;
-    *)
-        echo ""
-        echo "unknown option: $1"
-        echo ""
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h | --h | h | -help | --help | help | -H | --H | HELP)
+                usage
+                ;;
+            -mutex-name)
+                if [[ $# -ge 2 ]]; then
+                    MUTEX_NAME="$2"
+                    shift
+                fi
+                ;;
+            -command)
+                if [[ $# -ge 2 ]]; then
+                    SHELL_COMMAND="$2"
+                    shift
+                fi
+                ;;
+            *)
+                fail "Unknown option: $1"
+                ;;
+        esac
+        shift
+    done
+}
 
-        usage
-        ;;
-    esac
-done
+parse_args "$@"
 
-if [ "$(is_windows_platform)" != "true" ]; then
-    echo ""
-    echo "[ERROR]: This script only supports Windows platform"
-    echo ""
-
-    exit 1
+if [[ $(is_windows_platform) != "true" ]]; then
+    fail "This script only supports Windows platform"
 fi
 
-exec_command
+exec_command() {
+    local bash_path
+    bash_path=$(get_git_bash_path)
+    bash_path=$(cygpath -w "$bash_path")
+    local escaped_command
+    escaped_command=$(printf '%q' "$SHELL_COMMAND")
+    local command
+    command="powershell.exe -ExecutionPolicy Bypass -File \"$SCRIPT_DIR/shell-lock-by-ps.ps1\" -MutexName \"Global\\$MUTEX_NAME\" -GitBashPath \"$bash_path\" -ShellCommand $escaped_command"
+    eval "$command"
+    exit $?
+}
 
-# shellcheck disable=SC2317
-cd "$OLD_PWD" || exit >/dev/null 2>&1
+exec_command

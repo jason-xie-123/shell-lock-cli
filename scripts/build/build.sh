@@ -1,79 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/../..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+source "$PROJECT_ROOT/scripts/base/env.sh"
 
 TARGET_NAME="shell-lock-cli"
-
-RELEASE_DIR="$PROJECT_FOLDER/release"
-
-echo "Compiling binaries for multiple platforms..."
-
-cd "$PROJECT_FOLDER/shell-lock-cli" || exit >/dev/null 2>&1
-
+RELEASE_DIR="$PROJECT_ROOT/release"
 BUILD_PARAMETER="-ldflags '-w -s' -trimpath"
-# BUILD_PARAMETER=""
 
-# Windows amd64
-COMMAND="GOOS=windows GOARCH=amd64 go build $BUILD_PARAMETER -o $RELEASE_DIR/windows-amd64/${TARGET_NAME}.exe"
-echo exec: "$COMMAND"
-if eval "$COMMAND"; then
-    echo "Windows amd64 binary compiled successfully."
-else
-    echo "Failed to compile Windows amd64 binary."
-    exit 1
-fi
-# Windows 32-bit
-COMMAND="GOOS=windows GOARCH=386 go build $BUILD_PARAMETER -o $RELEASE_DIR/windows-386/${TARGET_NAME}.exe"
-echo exec: "$COMMAND"
-if eval "$COMMAND"; then
-    echo "Windows 32-bit binary compiled successfully."
-else
-    echo "Failed to compile Windows 32-bit binary."
-    exit 1
-fi
-# Windows ARM
-COMMAND="GOOS=windows GOARCH=arm64 go build $BUILD_PARAMETER -o $RELEASE_DIR/windows-arm64/${TARGET_NAME}.exe"
-echo exec: "$COMMAND"
-if eval "$COMMAND"; then
-    echo "Windows ARM binary compiled successfully."
-else
-    echo "Failed to compile Windows ARM binary."
-    exit 1
-fi
+mkdir -p \ \
+    "$RELEASE_DIR/windows-amd64" \ \
+    "$RELEASE_DIR/windows-386" \ \
+    "$RELEASE_DIR/windows-arm64" \ \
+    "$RELEASE_DIR/darwin-amd64" \ \
+    "$RELEASE_DIR/darwin-arm64"
 
-# darwin amd64
-COMMAND="GOOS=darwin GOARCH=amd64 go build $BUILD_PARAMETER -o $RELEASE_DIR/darwin-amd64/${TARGET_NAME}"
-echo exec: "$COMMAND"
-if eval "$COMMAND"; then
-    echo "darwin amd64 binary compiled successfully."
-else
-    echo "Failed to compile darwin amd64 binary."
-    exit 1
-fi
-# darwin ARM
-COMMAND="GOOS=darwin GOARCH=arm64 go build $BUILD_PARAMETER -o $RELEASE_DIR/darwin-arm64/${TARGET_NAME}"
-echo exec: "$COMMAND"
-if eval "$COMMAND"; then
-    echo "darwin ARM binary compiled successfully."
-else
-    echo "Failed to compile darwin ARM binary."
-    exit 1
-fi
+log_info "Compiling binaries for multiple platforms..."
 
-echo "Compilation completed."
+cd "$PROJECT_ROOT/shell-lock-cli"
 
-echo "Generated binaries:"
+run_command_or_fail "GOOS=windows GOARCH=amd64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-amd64/${TARGET_NAME}.exe\"" "Failed to compile Windows amd64 binary."
+run_command_or_fail "GOOS=windows GOARCH=386 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-386/${TARGET_NAME}.exe\"" "Failed to compile Windows 32-bit binary."
+run_command_or_fail "GOOS=windows GOARCH=arm64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-arm64/${TARGET_NAME}.exe\"" "Failed to compile Windows ARM binary."
+run_command_or_fail "GOOS=darwin GOARCH=amd64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/darwin-amd64/${TARGET_NAME}\"" "Failed to compile darwin amd64 binary."
+run_command_or_fail "GOOS=darwin GOARCH=arm64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/darwin-arm64/${TARGET_NAME}\"" "Failed to compile darwin ARM binary."
+
+log_info "Compilation completed."
+log_info "Generated binaries:"
 ls -lh "$RELEASE_DIR"
-
-cd "$OLD_PWD" || exit >/dev/null 2>&1

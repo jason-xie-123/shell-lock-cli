@@ -1,89 +1,37 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/../..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+source "$PROJECT_ROOT/scripts/base/env.sh"
 
-RELEASE_DIR="$PROJECT_FOLDER/release"
+RELEASE_DIR="$PROJECT_ROOT/release"
 
-cd "$RELEASE_DIR/windows-386" >/dev/null 2>&1 || exit
-COMMAND="zip -r \"$RELEASE_DIR/shell-lock-cli-windows-386.zip\" ./*"
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo ""
-    echo "[ERROR]: failed to zip bins"
-    echo ""
-    echo ""
+compress_zip() {
+    local source_dir="$1"
+    local target_name="$2"
 
-    exit 1
-fi
-cd - >/dev/null 2>&1 || exit
-rm -rf "$RELEASE_DIR/windows-386"
+    cd "$source_dir"
+    run_command_or_fail "zip -r \"$RELEASE_DIR/$target_name.zip\" ./*" "Failed to zip $target_name binaries"
+    cd - >/dev/null
+    rm -rf "$source_dir"
+}
 
-cd "$RELEASE_DIR/windows-amd64" >/dev/null 2>&1 || exit
-COMMAND="zip -r \"$RELEASE_DIR/shell-lock-cli-windows-amd64.zip\" ./*"
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo ""
-    echo "[ERROR]: failed to zip bins"
-    echo ""
-    echo ""
+compress_tar() {
+    local source_dir="$1"
+    local target_name="$2"
 
-    exit 1
-fi
-cd - >/dev/null 2>&1 || exit
-rm -rf "$RELEASE_DIR/windows-amd64"
+    run_command_or_fail "tar -zcvf \"$RELEASE_DIR/$target_name.tar.gz\" -C \"$source_dir\" ." "Failed to tar $target_name binaries"
+    rm -rf "$source_dir"
+}
 
-cd "$RELEASE_DIR/windows-arm64" >/dev/null 2>&1 || exit
-COMMAND="zip -r \"$RELEASE_DIR/shell-lock-cli-windows-arm64.zip\" ./*"
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo ""
-    echo "[ERROR]: failed to zip bins"
-    echo ""
-    echo ""
-
-    exit 1
-fi
-cd - >/dev/null 2>&1 || exit
-rm -rf "$RELEASE_DIR/windows-arm64"
-
-COMMAND="tar -zcvf \"$RELEASE_DIR/shell-lock-cli-darwin-amd64.tar.gz\" -C \"$RELEASE_DIR/darwin-amd64\" \".\""
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo ""
-    echo "[ERROR]: failed to zip bins"
-    echo ""
-    echo ""
-
-    exit 1
-fi
-rm -rf "$RELEASE_DIR/darwin-amd64"
-
-COMMAND="tar -zcvf \"$RELEASE_DIR/shell-lock-cli-darwin-arm64.tar.gz\" -C \"$RELEASE_DIR/darwin-arm64\" \".\""
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo ""
-    echo "[ERROR]: failed to zip bins"
-    echo ""
-    echo ""
-
-    exit 1
-fi
-rm -rf "$RELEASE_DIR/darwin-arm64"
-
-cd "$OLD_PWD" || exit >/dev/null 2>&1
+compress_zip "$RELEASE_DIR/windows-386" "shell-lock-cli-windows-386"
+compress_zip "$RELEASE_DIR/windows-amd64" "shell-lock-cli-windows-amd64"
+compress_zip "$RELEASE_DIR/windows-arm64" "shell-lock-cli-windows-arm64"
+compress_tar "$RELEASE_DIR/darwin-amd64" "shell-lock-cli-darwin-amd64"
+compress_tar "$RELEASE_DIR/darwin-arm64" "shell-lock-cli-darwin-arm64"

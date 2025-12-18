@@ -1,24 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/../..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+source "$PROJECT_ROOT/scripts/base/env.sh"
 
 exec_test_export_function() {
-    local CURRENT_SIGN
-    CURRENT_SIGN=$(echo "$1" | base64 --decode)
-    echo "exec_test_export_function [$CURRENT_SIGN]: start ......"
+    local current_sign
+    current_sign=$(echo "$1" | base64 --decode)
+    echo "exec_test_export_function [$current_sign]: start ......"
     sleep 1
-    echo "exec_test_export_function [$CURRENT_SIGN]: finish"
+    echo "exec_test_export_function [$current_sign]: finish"
 
     exit 100
 }
@@ -26,158 +23,129 @@ exec_test_export_function() {
 export -f exec_test_export_function
 
 test_export_function_by_go() {
-    local CURRENT_SIGN=$1
-    local ENCODED_CURRENT_SIGN
-    ENCODED_CURRENT_SIGN=$(echo "$1" | base64)
-    BASH_PATH=$(get_git_bash_path)
+    local current_sign="$1"
+    local encoded
+    encoded=$(echo "$current_sign" | base64)
+    local bash_path
+    bash_path=$(get_git_bash_path)
 
-    # COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=\"exec_test_export_function $ENCODED_CURRENT_SIGN\" --lock-file=\"$SHELL_FOLDER/shell-lock-test.lock\" --try-lock --bash-path=\"$BASH_PATH\""
-    COMMAND="\"$SHELL_LOCK_CLI_PATH\" --command=\"exec_test_export_function $ENCODED_CURRENT_SIGN\" --lock-file=\"$SHELL_FOLDER/shell-lock-test.lock\" --bash-path=\"$BASH_PATH\""
-    # echo exec: "$COMMAND"
-    eval "$COMMAND"
-    echo "EXIT-CODE [$CURRENT_SIGN]: $?"
+    local command
+    command="\"$SHELL_LOCK_CLI_PATH\" --command=\"exec_test_export_function $encoded\" --lock-file=\"$SCRIPT_DIR/shell-lock-test.lock\" --bash-path=\"$bash_path\""
+    eval "$command"
+    echo "EXIT-CODE [$current_sign]: $?"
 }
 
 test_export_function_by_ps() {
-    local CURRENT_SIGN=$1
-    local ENCODED_CURRENT_SIGN
-    ENCODED_CURRENT_SIGN=$(echo "$1" | base64)
-    COMMAND="\"$SHELL_FOLDER/shell-lock-by-ps.sh\" -mutex-name test-lock-3 -command \"exec_test_export_function $ENCODED_CURRENT_SIGN\""
-    # echo exec: "$COMMAND"
-    eval "$COMMAND"
-    echo "EXIT-CODE [$CURRENT_SIGN]: $?"
+    local current_sign="$1"
+    local encoded
+    encoded=$(echo "$current_sign" | base64)
+
+    local command
+    command="\"$SCRIPT_DIR/shell-lock-by-ps.sh\" -mutex-name test-lock-3 -command \"exec_test_export_function $encoded\""
+    eval "$command"
+    echo "EXIT-CODE [$current_sign]: $?"
 }
 
 calc_shell_lock_cli_path() {
-    CURRENT_BINARY_PATH=""
-    get_os_architecture CURRENT_ARCHITECTURE
+    local __result_var="$1"
+    local architecture
 
-    if [ "$CURRENT_ARCHITECTURE" == "X64" ]; then
-        if [ "$(is_windows_platform)" == "true" ]; then
-            CURRENT_BINARY_PATH="$PROJECT_FOLDER/release/windows-amd64/shell-lock-cli.exe"
-        elif [ "$(is_darwin_platform)" == "true" ]; then
-            CURRENT_BINARY_PATH="$PROJECT_FOLDER/release/darwin-amd64/shell-lock-cli"
-        else
-            echo ""
-            echo ""
-            echo "[ERROR]: Unsupported platform for X64 binary"
-            echo ""
-            echo ""
+    get_os_architecture architecture
 
-            exit 1
-        fi
-    elif [ "$CURRENT_ARCHITECTURE" == "X86" ]; then
-        if [ "$(is_windows_platform)" == "true" ]; then
-            CURRENT_BINARY_PATH="$PROJECT_FOLDER/release/windows-386/shell-lock-cli.exe"
-        else
-            echo ""
-            echo ""
-            echo "[ERROR]: Unsupported platform for X86 binary"
-            echo ""
-            echo ""
-
-            exit 1
-        fi
-    elif [ "$CURRENT_ARCHITECTURE" == "ARM64" ]; then
-        if [ "$(is_windows_platform)" == "true" ]; then
-            CURRENT_BINARY_PATH="$PROJECT_FOLDER/release/windows-arm64/shell-lock-cli.exe"
-        elif [ "$(is_darwin_platform)" == "true" ]; then
-            CURRENT_BINARY_PATH="$PROJECT_FOLDER/release/darwin-arm64/shell-lock-cli"
-        else
-            echo ""
-            echo ""
-            echo "[ERROR]: Unsupported platform for ARM64 binary"
-            echo ""
-            echo ""
-
-            exit 1
-        fi
-    else
-        echo ""
-        echo ""
-        echo "[ERROR]: Unknown architecture: $CURRENT_ARCHITECTURE"
-        echo ""
-        echo ""
-
-        exit 1
-    fi
-
-    eval "$1=\"$CURRENT_BINARY_PATH\""
+    case "$architecture" in
+        X64)
+            if [[ $(is_windows_platform) == "true" ]]; then
+                eval "$__result_var=\"$PROJECT_ROOT/release/windows-amd64/shell-lock-cli.exe\""
+            elif [[ $(is_darwin_platform) == "true" ]]; then
+                eval "$__result_var=\"$PROJECT_ROOT/release/darwin-amd64/shell-lock-cli\""
+            else
+                fail "Unsupported platform for X64 binary"
+            fi
+            ;;
+        X86)
+            if [[ $(is_windows_platform) == "true" ]]; then
+                eval "$__result_var=\"$PROJECT_ROOT/release/windows-386/shell-lock-cli.exe\""
+            else
+                fail "Unsupported platform for X86 binary"
+            fi
+            ;;
+        ARM64)
+            if [[ $(is_windows_platform) == "true" ]]; then
+                eval "$__result_var=\"$PROJECT_ROOT/release/windows-arm64/shell-lock-cli.exe\""
+            elif [[ $(is_darwin_platform) == "true" ]]; then
+                eval "$__result_var=\"$PROJECT_ROOT/release/darwin-arm64/shell-lock-cli\""
+            else
+                fail "Unsupported platform for ARM64 binary"
+            fi
+            ;;
+        *)
+            fail "Unknown architecture: $architecture"
+            ;;
+    esac
 }
 
 usage() {
-    echo "Usage:"
-    echo "  $(basename "$0") -operation [OPERATION] [-h]"
-    echo "Description:"
-    echo "  -operation: operation, support: test_export_function_by_go / test_export_function_by_ps"
-    echo ""
-    echo "Example:"
-    echo "  $(basename "$0") -operation test_export_function_by_go"
-    echo "  $(basename "$0") -operation test_export_function_by_ps"
-    echo ""
+    cat <<'USAGE'
+Usage:
+  shell-lock-test.sh -operation [OPERATION] [-h]
 
+Description:
+  -operation test_export_function_by_go | test_export_function_by_ps
+USAGE
     exit 1
 }
 
-while true; do
-    if [ "$(check_string_is_not_empty "$1")" != "true" ]; then
-        break
-    fi
-    case "$1" in
-    -h | --h | h | -help | --help | help | -H | --H | HELP)
-        usage
-        ;;
-    -operation)
-        if [ $# -ge 2 ]; then
-            OPERATION=$2
-            shift 2
-        else
-            shift 1
-        fi
-        ;;
-    *)
-        echo ""
-        echo "[ERROR] unknown option: $1"
-        echo ""
+OPERATION=""
 
-        exit 1
-        ;;
-    esac
-done
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h | --h | h | -help | --help | help | -H | --H | HELP)
+                usage
+                ;;
+            -operation)
+                if [[ $# -ge 2 ]]; then
+                    OPERATION="$2"
+                    shift
+                fi
+                ;;
+            *)
+                fail "Unknown option: $1"
+                ;;
+        esac
+        shift
+    done
+}
+
+parse_args "$@"
 
 calc_shell_lock_cli_path SHELL_LOCK_CLI_PATH
 
-start_time_1=$(date +%s)
+start_time=$(date +%s)
 
 case "$OPERATION" in
-test_export_function_by_go)
-    for i in {1..10}; do
-        test_export_function_by_go "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
-    done
-    ;;
-test_export_function_by_ps)
-    for i in {1..10}; do
-        test_export_function_by_ps "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
-    done
-    ;;
-*)
-    echo ""
-    echo "[ERROR] unsupported operation: $OPERATION"
-    echo ""
-
-    exit 1
-    ;;
+    test_export_function_by_go)
+        for i in {1..10}; do
+            test_export_function_by_go "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
+        done
+        ;;
+    test_export_function_by_ps)
+        for i in {1..10}; do
+            test_export_function_by_ps "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
+        done
+        ;;
+    *)
+        fail "Unsupported operation: $OPERATION"
+        ;;
 esac
 
 wait
 
-end_time_1=$(date +%s)
-execution_time_1=$((end_time_1 - start_time_1))
+end_time=$(date +%s)
+execution_time=$((end_time - start_time))
 
 echo ""
 echo "----------------------------------------"
-echo "Execution time [$OPERATION]: $execution_time_1 seconds"
+echo "Execution time [$OPERATION]: $execution_time seconds"
 echo "----------------------------------------"
 echo ""
-
-cd "$OLD_PWD" || exit >/dev/null 2>&1

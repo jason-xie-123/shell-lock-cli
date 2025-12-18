@@ -1,18 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/../..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+source "$PROJECT_ROOT/scripts/base/env.sh"
 
+log_info "Installing shell-lock-cli to GOPATH/bin"
 go install shell-lock-cli
-
-cd "$OLD_PWD" || exit >/dev/null 2>&1
