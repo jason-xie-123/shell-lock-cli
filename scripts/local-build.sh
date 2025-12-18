@@ -28,19 +28,19 @@ USAGE
 process_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h | --h | h | -help | --help | help | -H | --H | HELP)
-                usage
-                ;;
-            --flag-compress-release)
-                IS_SUPPORT_COMPRESS_RELEASE="true"
-                ;;
-            --flag-upload-to-github)
-                IS_SUPPORT_UPLOAD_TO_GITHUB="true"
-                ;;
-            *)
-                log_error "Unknown option: $1"
-                usage
-                ;;
+        -h | --h | h | -help | --help | help | -H | --H | HELP)
+            usage
+            ;;
+        --flag-compress-release)
+            IS_SUPPORT_COMPRESS_RELEASE="true"
+            ;;
+        --flag-upload-to-github)
+            IS_SUPPORT_UPLOAD_TO_GITHUB="true"
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            usage
+            ;;
         esac
         shift
     done

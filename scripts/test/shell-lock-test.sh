@@ -53,34 +53,34 @@ calc_shell_lock_cli_path() {
     get_os_architecture architecture
 
     case "$architecture" in
-        X64)
-            if [[ $(is_windows_platform) == "true" ]]; then
-                eval "$__result_var=\"$PROJECT_ROOT/release/windows-amd64/shell-lock-cli.exe\""
-            elif [[ $(is_darwin_platform) == "true" ]]; then
-                eval "$__result_var=\"$PROJECT_ROOT/release/darwin-amd64/shell-lock-cli\""
-            else
-                fail "Unsupported platform for X64 binary"
-            fi
-            ;;
-        X86)
-            if [[ $(is_windows_platform) == "true" ]]; then
-                eval "$__result_var=\"$PROJECT_ROOT/release/windows-386/shell-lock-cli.exe\""
-            else
-                fail "Unsupported platform for X86 binary"
-            fi
-            ;;
-        ARM64)
-            if [[ $(is_windows_platform) == "true" ]]; then
-                eval "$__result_var=\"$PROJECT_ROOT/release/windows-arm64/shell-lock-cli.exe\""
-            elif [[ $(is_darwin_platform) == "true" ]]; then
-                eval "$__result_var=\"$PROJECT_ROOT/release/darwin-arm64/shell-lock-cli\""
-            else
-                fail "Unsupported platform for ARM64 binary"
-            fi
-            ;;
-        *)
-            fail "Unknown architecture: $architecture"
-            ;;
+    X64)
+        if [[ $(is_windows_platform) == "true" ]]; then
+            eval "$__result_var=\"$PROJECT_ROOT/release/windows-amd64/shell-lock-cli.exe\""
+        elif [[ $(is_darwin_platform) == "true" ]]; then
+            eval "$__result_var=\"$PROJECT_ROOT/release/darwin-amd64/shell-lock-cli\""
+        else
+            fail "Unsupported platform for X64 binary"
+        fi
+        ;;
+    X86)
+        if [[ $(is_windows_platform) == "true" ]]; then
+            eval "$__result_var=\"$PROJECT_ROOT/release/windows-386/shell-lock-cli.exe\""
+        else
+            fail "Unsupported platform for X86 binary"
+        fi
+        ;;
+    ARM64)
+        if [[ $(is_windows_platform) == "true" ]]; then
+            eval "$__result_var=\"$PROJECT_ROOT/release/windows-arm64/shell-lock-cli.exe\""
+        elif [[ $(is_darwin_platform) == "true" ]]; then
+            eval "$__result_var=\"$PROJECT_ROOT/release/darwin-arm64/shell-lock-cli\""
+        else
+            fail "Unsupported platform for ARM64 binary"
+        fi
+        ;;
+    *)
+        fail "Unknown architecture: $architecture"
+        ;;
     esac
 }
 
@@ -100,18 +100,18 @@ OPERATION=""
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h | --h | h | -help | --help | help | -H | --H | HELP)
-                usage
-                ;;
-            -operation)
-                if [[ $# -ge 2 ]]; then
-                    OPERATION="$2"
-                    shift
-                fi
-                ;;
-            *)
-                fail "Unknown option: $1"
-                ;;
+        -h | --h | h | -help | --help | help | -H | --H | HELP)
+            usage
+            ;;
+        -operation)
+            if [[ $# -ge 2 ]]; then
+                OPERATION="$2"
+                shift
+            fi
+            ;;
+        *)
+            fail "Unknown option: $1"
+            ;;
         esac
         shift
     done
@@ -124,19 +124,19 @@ calc_shell_lock_cli_path SHELL_LOCK_CLI_PATH
 start_time=$(date +%s)
 
 case "$OPERATION" in
-    test_export_function_by_go)
-        for i in {1..10}; do
-            test_export_function_by_go "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
-        done
-        ;;
-    test_export_function_by_ps)
-        for i in {1..10}; do
-            test_export_function_by_ps "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
-        done
-        ;;
-    *)
-        fail "Unsupported operation: $OPERATION"
-        ;;
+test_export_function_by_go)
+    for i in {1..10}; do
+        test_export_function_by_go "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
+    done
+    ;;
+test_export_function_by_ps)
+    for i in {1..10}; do
+        test_export_function_by_ps "--abc\$HOME/def--a\'\nb--a b\c--\\$i\\--\"'//\\$i\\//\"'--" &
+    done
+    ;;
+*)
+    fail "Unsupported operation: $OPERATION"
+    ;;
 esac
 
 wait

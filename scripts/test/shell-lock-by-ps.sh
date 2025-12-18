@@ -28,24 +28,24 @@ USAGE
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            -h | --h | h | -help | --help | help | -H | --H | HELP)
-                usage
-                ;;
-            -mutex-name)
-                if [[ $# -ge 2 ]]; then
-                    MUTEX_NAME="$2"
-                    shift
-                fi
-                ;;
-            -command)
-                if [[ $# -ge 2 ]]; then
-                    SHELL_COMMAND="$2"
-                    shift
-                fi
-                ;;
-            *)
-                fail "Unknown option: $1"
-                ;;
+        -h | --h | h | -help | --help | help | -H | --H | HELP)
+            usage
+            ;;
+        -mutex-name)
+            if [[ $# -ge 2 ]]; then
+                MUTEX_NAME="$2"
+                shift
+            fi
+            ;;
+        -command)
+            if [[ $# -ge 2 ]]; then
+                SHELL_COMMAND="$2"
+                shift
+            fi
+            ;;
+        *)
+            fail "Unknown option: $1"
+            ;;
         esac
         shift
     done
