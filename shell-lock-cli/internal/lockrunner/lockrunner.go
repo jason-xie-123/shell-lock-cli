@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 
 	"github.com/gofrs/flock"
 )
@@ -42,8 +43,10 @@ func Run(opts Options) error {
 	if opts.LockFile == "" {
 		return errors.New("lock-file is required")
 	}
-	if opts.BashPath == "" {
-		return errors.New("bash-path is required")
+
+	bashPath, err := FindBashPath(opts.BashPath)
+	if err != nil {
+		return err
 	}
 
 	stdout := opts.Stdout
@@ -77,7 +80,7 @@ func Run(opts Options) error {
 		defer fileLock.Unlock()
 	}
 
-	cmd := exec.Command(opts.BashPath, "-c", opts.Command)
+	cmd := exec.Command(bashPath, "-c", opts.Command)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
@@ -90,4 +93,57 @@ func Run(opts Options) error {
 	}
 
 	return nil
+}
+
+// FindBashPath resolves the path to a usable bash executable.
+// If a path is provided, it is validated; otherwise common locations and PATH are searched.
+func FindBashPath(provided string) (string, error) {
+	if provided != "" {
+		if isExecutableFile(provided) {
+			return provided, nil
+		}
+		return "", fmt.Errorf("bash executable not found at %q", provided)
+	}
+
+	candidates := make([]string, 0, 5)
+	if lp, err := exec.LookPath("bash"); err == nil {
+		candidates = append(candidates, lp)
+	}
+
+	if runtime.GOOS == "windows" {
+		candidates = append(candidates,
+			`C:\\Program Files\\Git\\bin\\bash.exe`,
+			`C:\\Program Files (x86)\\Git\\bin\\bash.exe`,
+		)
+	} else {
+		candidates = append(candidates, "/bin/bash", "/usr/bin/bash")
+	}
+
+	seen := make(map[string]struct{}, len(candidates))
+	for _, cand := range candidates {
+		if cand == "" {
+			continue
+		}
+		if _, dup := seen[cand]; dup {
+			continue
+		}
+		seen[cand] = struct{}{}
+
+		if isExecutableFile(cand) {
+			return cand, nil
+		}
+	}
+
+	return "", fmt.Errorf("bash executable not found; tried candidates: %v", candidates)
+}
+
+func isExecutableFile(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil || info.IsDir() {
+		return false
+	}
+	if runtime.GOOS == "windows" {
+		return true
+	}
+	return info.Mode().Perm()&0o111 != 0
 }

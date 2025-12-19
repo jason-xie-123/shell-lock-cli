@@ -5,9 +5,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"testing"
+
+	"shell-lock-cli/internal/lockrunner"
 
 	"github.com/gofrs/flock"
 	"github.com/urfave/cli/v2"
@@ -53,14 +54,11 @@ func withCapturedOutput(t *testing.T, fn func()) (string, string) {
 
 func bashPathForTests(t *testing.T) string {
 	t.Helper()
-	if runtime.GOOS == "windows" {
-		p := `C:\\Program Files\\Git\\bin\\bash.exe`
-		if _, err := os.Stat(p); err != nil {
-			t.Skip("Windows bash not available; skipping CLI exec tests")
-		}
-		return p
+	bp, err := lockrunner.FindBashPath("")
+	if err != nil {
+		t.Skipf("bash not available; skipping CLI exec tests: %v", err)
 	}
-	return "/bin/bash"
+	return bp
 }
 
 func TestCLI_RequiredFlags(t *testing.T) {
@@ -135,13 +133,11 @@ func TestCLI_Success_PrintsOutput(t *testing.T) {
 }
 
 func TestDefaultBashPath(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		if got := defaultBashPath(); !strings.Contains(got, `C:\\Program Files\\Git\\bin\\bash.exe`) {
-			t.Fatalf("unexpected default bash on windows: %q", got)
-		}
-	} else {
-		if got := defaultBashPath(); got != "/bin/bash" {
-			t.Fatalf("unexpected default bash on non-windows: %q", got)
-		}
+	resolved, err := lockrunner.FindBashPath("")
+	if err != nil {
+		t.Skipf("bash not available for default detection: %v", err)
+	}
+	if got := defaultBashPath(); got != resolved {
+		t.Fatalf("default bash path mismatch, want %q got %q", resolved, got)
 	}
 }
