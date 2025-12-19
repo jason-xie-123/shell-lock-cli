@@ -11,4 +11,4 @@ cd "$SCRIPT_DIR"
 source "$PROJECT_ROOT/scripts/base/env.sh"
 
 log_info "Installing shell-lock-cli to GOPATH/bin"
-go install shell-lock-cli
+go install ./cmd/shell-lock-cli
