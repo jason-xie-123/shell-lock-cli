@@ -20,11 +20,13 @@ log_info "Compiling binaries for multiple platforms..."
 
 cd "$PROJECT_ROOT/shell-lock-cli"
 
-run_command_or_fail "GOOS=windows GOARCH=amd64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-amd64/${TARGET_NAME}.exe\"" "Failed to compile Windows amd64 binary."
-run_command_or_fail "GOOS=windows GOARCH=386 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-386/${TARGET_NAME}.exe\"" "Failed to compile Windows 32-bit binary."
-run_command_or_fail "GOOS=windows GOARCH=arm64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-arm64/${TARGET_NAME}.exe\"" "Failed to compile Windows ARM binary."
-run_command_or_fail "GOOS=darwin GOARCH=amd64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/darwin-amd64/${TARGET_NAME}\"" "Failed to compile darwin amd64 binary."
-run_command_or_fail "GOOS=darwin GOARCH=arm64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/darwin-arm64/${TARGET_NAME}\"" "Failed to compile darwin ARM binary."
+PACKAGE_PATH="./cmd/shell-lock-cli"
+
+run_command_or_fail "GOOS=windows GOARCH=amd64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-amd64/${TARGET_NAME}.exe\" $PACKAGE_PATH" "Failed to compile Windows amd64 binary."
+run_command_or_fail "GOOS=windows GOARCH=386 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-386/${TARGET_NAME}.exe\" $PACKAGE_PATH" "Failed to compile Windows 32-bit binary."
+run_command_or_fail "GOOS=windows GOARCH=arm64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/windows-arm64/${TARGET_NAME}.exe\" $PACKAGE_PATH" "Failed to compile Windows ARM binary."
+run_command_or_fail "GOOS=darwin GOARCH=amd64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/darwin-amd64/${TARGET_NAME}\" $PACKAGE_PATH" "Failed to compile darwin amd64 binary."
+run_command_or_fail "GOOS=darwin GOARCH=arm64 go build $BUILD_PARAMETER -o \"$RELEASE_DIR/darwin-arm64/${TARGET_NAME}\" $PACKAGE_PATH" "Failed to compile darwin ARM binary."
 
 log_info "Compilation completed."
 log_info "Generated binaries:"
