@@ -39,8 +39,21 @@ func TestRun_ValidationErrors(t *testing.T) {
 	if err := Run(Options{Command: "echo ok", LockFile: "", BashPath: bp}); err == nil {
 		t.Fatalf("expected error for missing lock-file")
 	}
-	if err := Run(Options{Command: "echo ok", LockFile: lock, BashPath: ""}); err == nil {
-		t.Fatalf("expected error for missing bash-path")
+}
+
+func TestRun_BashPathAutoDiscovery(t *testing.T) {
+	bp := bashPathOrSkip(t)
+	lock := filepath.Join(t.TempDir(), "auto.lock")
+	// Ensure the directory containing bash is on PATH for discovery
+	t.Setenv("PATH", filepath.Dir(bp)+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	var out bytes.Buffer
+	err := Run(Options{Command: "echo AUTO", LockFile: lock, BashPath: "", Stdout: &out})
+	if err != nil {
+		t.Fatalf("unexpected error during auto discovery: %v", err)
+	}
+	if !bytes.Contains(out.Bytes(), []byte("AUTO")) {
+		t.Fatalf("expected AUTO output, got: %q", out.String())
 	}
 }
 

@@ -76,6 +76,9 @@ func newApp() *cli.App {
 }
 
 func defaultBashPath() string {
+	if p, err := lockrunner.FindBashPath(""); err == nil {
+		return p
+	}
 	if runtime.GOOS == "windows" {
 		return "C:\\Program Files\\Git\\bin\\bash.exe"
 	}
