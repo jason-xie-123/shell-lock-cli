@@ -205,6 +205,9 @@ func TestRun_InvalidBashPath_Error(t *testing.T) {
 }
 
 func TestRun_LockPathError(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("lock path permission semantics differ on Windows; skipping")
+	}
 	dir := t.TempDir()
 	noWrite := filepath.Join(dir, "ro")
 	if err := os.Mkdir(noWrite, 0o555); err != nil {
