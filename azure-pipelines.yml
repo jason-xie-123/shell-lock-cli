@@ -42,9 +42,8 @@ stages:
         PublishLocation: Container
 
 - stage: Release
-  displayName: Build and Release (tags only)
+  displayName: Build and Release
   dependsOn: Test
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
   jobs:
   - job: release_macos
     displayName: Build and upload release (macOS)
