@@ -358,7 +358,7 @@ check_windows_os_info_exist() {
 
 get_os_architecture() {
     local __result_var="$1"
-    local architecture="unknown"
+    local __arch="unknown"
 
     if [[ $(is_windows_platform) == "true" ]]; then
         check_windows_os_info_exist
@@ -366,22 +366,22 @@ get_os_architecture() {
         result=$(windows-os-info --action=os_arch)
 
         case "$result" in
-        arm64) architecture="ARM64" ;;
-        x86) architecture="X86" ;;
-        x64) architecture="X64" ;;
-        *) architecture="unknown" ;;
+        arm64) __arch="ARM64" ;;
+        x86) __arch="X86" ;;
+        x64) __arch="X64" ;;
+        *) __arch="unknown" ;;
         esac
     elif [[ $(is_darwin_platform) == "true" ]]; then
         local result
         result=$(uname -m)
 
         case "$result" in
-        x86_64) architecture="X64" ;;
-        arm64) architecture="ARM64" ;;
+        x86_64) __arch="X64" ;;
+        arm64) __arch="ARM64" ;;
         esac
     fi
 
-    eval "$__result_var=\"$architecture\""
+    eval "$__result_var=\"$__arch\""
 }
 
 get_git_bash_path() {
