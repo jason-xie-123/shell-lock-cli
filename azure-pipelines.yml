@@ -44,6 +44,7 @@ stages:
 - stage: Release
   displayName: Build and Release
   dependsOn: Test
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - job: release_macos
     displayName: Build and upload release (macOS)
