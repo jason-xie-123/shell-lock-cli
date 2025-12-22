@@ -56,7 +56,7 @@ Common examples:
 - Lock acquisition failures or missing/invalid parameters exit with a non-zero status.
 
 ## Version
-Current version: `0.1.0` (also available via the `--version` flag).
+Run `./shell-lock-cli --version` to check the current version.
 
 ## Project layout
 - [shell-lock-cli/cmd/shell-lock-cli](shell-lock-cli/cmd/shell-lock-cli): CLI entry point.
