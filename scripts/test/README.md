@@ -1,103 +1,103 @@
-# Shell Lock CLI - 测试套件
+# Shell Lock CLI - Test Suite
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 运行所有测试
+### Run All Tests
 ```bash
 ./run-all-tests.sh
 ```
-运行 21 个综合测试场景，约需 2-3 分钟。
+Runs 21 comprehensive test scenarios, takes approximately 2-3 minutes.
 
-### 快速验证
+### Quick Verification
 ```bash
 ./quick-test.sh
 ```
-运行 10 个核心测试，约需 10 秒。
+Runs 10 core tests, takes approximately 10 seconds.
 
-### 压力测试
+### Stress Tests
 ```bash
 ./stress-test.sh
 ```
-运行 7 个高强度压力测试，约需 2-5 分钟。
+Runs 7 high-intensity stress tests, takes approximately 2-5 minutes.
 
-## 📁 文件说明
+## 📁 File Description
 
-| 文件 | 说明 | 大小 |
+| File | Description | Size |
 |-----|------|------|
-| `run-all-tests.sh` | 主测试运行器（21 个测试） | 4.7K |
-| `shell-lock-test.sh` | 测试实现脚本 | 17K |
-| `stress-test.sh` | 压力测试套件（7 个测试） | 12K |
-| `quick-test.sh` | 快速验证工具（10 秒） | 1.6K |
-| `shell-lock-by-ps.sh` | PowerShell 对比测试 | 1.6K |
-| `shell-lock-by-ps.ps1` | PowerShell 脚本 | - |
+| `run-all-tests.sh` | Main test runner (21 tests) | 4.7K |
+| `shell-lock-test.sh` | Test implementation script | 17K |
+| `stress-test.sh` | Stress test suite (7 tests) | 12K |
+| `quick-test.sh` | Quick verification tool (10 seconds) | 1.6K |
+| `shell-lock-by-ps.sh` | PowerShell comparison test | 1.6K |
+| `shell-lock-by-ps.ps1` | PowerShell script | - |
 
-## 📚 文档
+## 📚 Documentation
 
-- **[REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md)** - 重构总结和完整说明
-- **[TEST_REFACTORING.md](TEST_REFACTORING.md)** - 详细的测试文档
+- **[REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md)** - Refactoring summary and complete explanation
+- **[TEST_REFACTORING.md](TEST_REFACTORING.md)** - Detailed test documentation
 
-## 🎯 测试覆盖
+## 🎯 Test Coverage
 
-### 标准测试（21 个）
+### Standard Tests (21)
 
-1. **基础功能** (4 个)
-   - 导出函数测试
-   - 快速执行测试
-   - 错误退出码测试
-   - PowerShell 对比测试
+1. **Basic Functionality** (4)
+   - Export function test
+   - Quick execution test
+   - Error exit code test
+   - PowerShell comparison test
 
-2. **环境配置** (3 个)
-   - 环境变量继承
-   - 多环境变量传递
-   - 目录切换测试
+2. **Environment Configuration** (3)
+   - Environment variable inheritance
+   - Multiple environment variable passing
+   - Directory change test
 
-3. **锁行为** (5 个)
-   - 并发访问控制
-   - 锁文件清理
-   - 锁独立性
-   - Try-lock 超时
-   - 快速加锁循环
+3. **Lock Behavior** (5)
+   - Concurrent access control
+   - Lock file cleanup
+   - Lock independence
+   - Try-lock timeout
+   - Rapid lock acquisition cycle
 
-4. **边界条件** (3 个)
-   - 特殊路径字符
-   - 无效参数检测
-   - 空命令处理
+4. **Edge Cases** (3)
+   - Special path characters
+   - Invalid argument detection
+   - Empty command handling
 
-5. **命令复杂度** (3 个)
-   - 多行命令
-   - 管道和重定向
-   - 大输出缓冲
+5. **Command Complexity** (3)
+   - Multiline commands
+   - Pipes and redirections
+   - Large output buffering
 
-6. **信号处理** (1 个)
-   - 信号中断处理
+6. **Signal Handling** (1)
+   - Signal interruption handling
 
-7. **CLI 接口** (2 个)
-   - 版本标志
-   - 帮助信息
+7. **CLI Interface** (2)
+   - Version flag
+   - Help information
 
-### 压力测试（7 个）
+### Stress Tests (7)
 
-1. **高并发测试** - 50 个进程竞争单锁
-2. **大输出测试** - 10,000 行输出
-3. **快速循环测试** - 100 次加锁/释放循环
-4. **多锁测试** - 10 个锁 × 10 个进程
-5. **Try-lock 竞争** - 1 持锁 + 20 尝试
-6. **长时间运行** - 30 秒持续命令
-7. **突发流量** - 5 波 × 20 进程
+1. **High Concurrency Test** - 50 processes competing for single lock
+2. **Large Output Test** - 10,000 lines of output
+3. **Rapid Cycle Test** - 100 lock acquisition/release cycles
+4. **Multiple Lock Test** - 10 locks × 10 processes
+5. **Try-lock Contention** - 1 lock holder + 20 attempts
+6. **Long-running Test** - 30-second sustained command
+7. **Burst Traffic Test** - 5 waves × 20 processes
 
-## 📊 测试统计
+## 📊 Test Statistics
 
-| 指标 | 数量 |
+| Metric | Count |
 |-----|------|
-| 测试脚本 | 4 个 |
-| 标准测试场景 | 21 个 |
-| 压力测试场景 | 7 个 |
-| 总测试场景 | 28 个 |
-| 代码行数 | ~750 行 |
+| Test scripts | 4 |
+| Standard test scenarios | 21 |
+| Stress test scenarios | 7 |
+| Total test scenarios | 28 |
+| Lines of code | ~750 |
 
-## ✅ 验证通过
+## ✅ Verification Passed
 
-所有 10 个核心新测试已验证通过：
+All 10 core new tests have been verified to pass:
 - ✅ Version Flag
 - ✅ Help Flag
 - ✅ Invalid Arguments
@@ -109,56 +109,56 @@
 - ✅ Lock Independence
 - ✅ Directory Change
 
-## 🔧 运行单个测试
+## 🔧 Running Individual Tests
 
 ```bash
-# 查看所有可用测试
+# View all available tests
 ./shell-lock-test.sh -h
 
-# 运行特定测试
+# Run specific tests
 ./shell-lock-test.sh -operation test_version_flag
 ./shell-lock-test.sh -operation test_rapid_lock_cycles
 ./shell-lock-test.sh -operation test_multiline_commands
 ```
 
-## 📈 测试改进
+## 📈 Test Improvements
 
-相比重构前：
-- 测试场景数：**7 → 28** (+300%)
-- 代码行数：**~150 → ~750** (+400%)
-- 测试维度：**1 → 6** 大类
-- 压力测试：**0 → 7** 个
+Compared to before refactoring:
+- Number of test scenarios: **7 → 28** (+300%)
+- Lines of code: **~150 → ~750** (+400%)
+- Test dimensions: **1 → 6** categories
+- Stress tests: **0 → 7**
 
-## 🐛 问题排查
+## 🐛 Troubleshooting
 
-如果测试失败：
+If tests fail:
 
-1. **检查环境**
+1. **Check Environment**
    ```bash
-   # 确保已构建二进制文件
+   # Ensure binaries are built
    cd ../../
    ./scripts/local-build.sh
    ```
 
-2. **查看详细输出**
+2. **View Detailed Output**
    ```bash
-   # 运行单个测试查看详细信息
+   # Run individual test for details
    ./shell-lock-test.sh -operation test_name
    ```
 
-3. **检查平台兼容性**
-   - macOS (Intel/ARM64): ✅ 完全支持
-   - Linux (X64/ARM64): ✅ 完全支持
-   - Windows (Git Bash): ⚠️ 部分测试可能跳过
+3. **Check Platform Compatibility**
+   - macOS (Intel/ARM64): ✅ Fully supported
+   - Linux (X64/ARM64): ✅ Fully supported
+   - Windows (Git Bash): ⚠️ Some tests may be skipped
 
-## 📞 获取帮助
+## 📞 Get Help
 
-- 查看 [REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md) 了解重构详情
-- 查看 [TEST_REFACTORING.md](TEST_REFACTORING.md) 了解测试实现
-- 运行 `./quick-test.sh` 快速验证环境
+- See [REFACTORING_SUMMARY.md](REFACTORING_SUMMARY.md) for refactoring details
+- See [TEST_REFACTORING.md](TEST_REFACTORING.md) for test implementation
+- Run `./quick-test.sh` to quickly verify your environment
 
 ---
 
-**更新日期**: 2025-12-19  
-**版本**: v2.0  
-**状态**: ✅ 已完成
+**Last Updated**: 2025-12-19  
+**version**: v2.0  
+**Status**: ✅ Completed

@@ -274,7 +274,7 @@ test_special_path_lock() {
     echo "Testing lock file with spaces in path..."
     "$SHELL_LOCK_CLI_PATH" --command="echo 'Special path test'" --lock-file="$lock_file" --bash-path="$bash_path"
     
-    echo "Special path test completed"
+    echo "Special path test completed: failed to acquire lock"
     rm -rf "$lock_dir"
 }
 

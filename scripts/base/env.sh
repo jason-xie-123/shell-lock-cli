@@ -328,6 +328,7 @@ check_windows_os_info_exist() {
         log_warn "Missing windows-os-info command, downloading binary"
 
         local download_url="https://github.com/jason-xie-123/windows-os-info/releases/download/v0.1.1/windows-os-info.exe"
+        local expected_checksum="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # SHA256 checksum of the binary
         local download_file="windows-os-info.exe"
         local current_script_dir
         current_script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
@@ -336,10 +337,19 @@ check_windows_os_info_exist() {
 
         local command
         command="curl -L -o \"$current_script_dir/$download_file\" \"$download_url\""
-        log_info "exec: $command"
+        log_info "Downloading binary from GitHub release (checksum validation enabled)"
         eval "$command" || fail "Failed to download $download_file from $download_url"
 
         if [[ $(check_file_exist "$current_script_dir/$download_file") == "true" ]]; then
+            # Verify checksum
+            local actual_checksum
+            actual_checksum=$(shasum -a 256 "$current_script_dir/$download_file" | awk '{print $1}') || fail "Failed to compute checksum"
+            
+            if [[ "$actual_checksum" != "$expected_checksum" ]]; then
+                rm -f "$current_script_dir/$download_file"
+                fail "Checksum verification failed. Expected: $expected_checksum, Got: $actual_checksum"
+            fi
+            
             local bins_target_folder="/usr/bin"
             if [[ $(check_folder_exist "/usr/local/bin") == "true" ]]; then
                 bins_target_folder="/usr/local/bin"
@@ -402,8 +412,11 @@ get_git_bash_path() {
 run_command_or_fail() {
     local command="$1"
     local error_message="$2"
+    local suppress_logging="${3:-false}"
 
-    log_info "exec: $command"
+    if [[ "$suppress_logging" != "true" ]]; then
+        log_info "exec: $command"
+    fi
     if ! eval "$command"; then
         fail "$error_message"
     fi
