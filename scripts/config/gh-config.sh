@@ -1,86 +1,55 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/../..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
+source "$PROJECT_ROOT/scripts/base/env.sh"
+
+GH_TOKEN=""
 
 usage() {
-    echo "Usage:"
-    echo "  $(basename "$0") -token [GH_TOKEN] [-h]"
-    echo "Description:"
-    echo "  [GH_TOKEN]: GitHub token"
-    echo ""
-    echo "Example:"
-    echo "  $(basename "$0") -token \"\${ENV_GH_TOKEN}\""
-    echo ""
+    cat <<'USAGE'
+Usage:
+  gh-config.sh -token [GH_TOKEN] [-h]
 
+Description:
+  -token GitHub token
+USAGE
     exit 1
 }
 
-while true; do
-    if [ -z "$1" ]; then
-        break
-    fi
-    case "$1" in
-    -h | --h | h | -help | --help | help | -H | --H | HELP)
-        usage
-        ;;
-    -token)
-        if [ $# -ge 2 ]; then
-            GH_TOKEN=$2
-            shift 2
-        else
-            shift 1
-        fi
-        ;;
-    *)
-        echo ""
-        echo "unknown option: $1"
-        echo ""
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        -h | --h | h | -help | --help | help | -H | --H | HELP)
+            usage
+            ;;
+        -token)
+            if [[ $# -ge 2 ]]; then
+                GH_TOKEN="$2"
+                shift
+            fi
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            usage
+            ;;
+        esac
+        shift
+    done
+}
 
-        usage
-        ;;
-    esac
-done
+parse_args "$@"
 
 check_gh_exist
 check_jq_exist
 
-if [ -z "$GH_TOKEN" ]; then
-    echo ""
-    echo "[ERROR]: GH_TOKEN is required."
-    echo ""
+[[ -n "$GH_TOKEN" ]] || fail "GH_TOKEN is required."
 
-    exit 1
-fi
-
-COMMAND="echo \"$GH_TOKEN\" | gh auth login --with-token"
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo "[ERROR]: failed to login with token"
-    echo ""
-
-    exit 1
-fi
-
-COMMAND="GH_PAGER='' gh api user | jq ."
-echo exec: "$COMMAND"
-if ! eval "$COMMAND"; then
-    echo ""
-    echo "[ERROR]: failed to get gh user info"
-    echo ""
-
-    exit 1
-fi
-
-cd "$OLD_PWD" || exit >/dev/null 2>&1
+run_command_or_fail "echo \"$GH_TOKEN\" | gh auth login --with-token" "Failed to login with token" "true"
+run_command_or_fail "GH_PAGER='' gh api user | jq ." "Failed to get gh user info"

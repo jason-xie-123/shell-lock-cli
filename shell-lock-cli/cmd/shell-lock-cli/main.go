@@ -1,0 +1,98 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"runtime"
+
+	"shell-lock-cli/internal/lockrunner"
+	packageVersion "shell-lock-cli/version"
+
+	"github.com/urfave/cli/v2"
+)
+
+const appName = "shell-lock-cli"
+
+func main() {
+	app := newApp()
+
+	if err := app.Run(os.Args); err != nil {
+		if exitErr, ok := err.(cli.ExitCoder); ok {
+			os.Exit(exitErr.ExitCode())
+		}
+
+		fmt.Fprintf(os.Stderr, "[ERROR] %s\n", err.Error())
+		os.Exit(1)
+	}
+}
+
+func newApp() *cli.App {
+	defaultBash := defaultBashPath()
+
+	return &cli.App{
+		Name:    appName,
+		Usage:   "CLI tool to run shell-lock operations",
+		Version: packageVersion.Version,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "command",
+				Usage:    "The shell command to execute",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "lock-file",
+				Usage:    "The mutex lock file",
+				Required: true,
+			},
+			&cli.BoolFlag{
+				Name:  "try-lock",
+				Usage: "Try to acquire the lock without waiting",
+			},
+			&cli.StringFlag{
+				Name:  "bash-path",
+				Usage: "Path to bash executable (defaults to platform-specific path)",
+				Value: defaultBash,
+			},
+		},
+		Action: func(c *cli.Context) error {
+			// Validate required flags
+			command := c.String("command")
+			lockFile := c.String("lock-file")
+
+			if command == "" {
+				return cli.Exit("Error: command flag is required and cannot be empty", 1)
+			}
+			if lockFile == "" {
+				return cli.Exit("Error: lock-file flag is required and cannot be empty", 1)
+			}
+
+			err := lockrunner.Run(lockrunner.Options{
+				Command:  command,
+				LockFile: lockFile,
+				TryLock:  c.Bool("try-lock"),
+				BashPath: c.String("bash-path"),
+				Stdout:   os.Stdout,
+				Stderr:   os.Stderr,
+			})
+
+			var exitErr lockrunner.ExitCodeError
+			if errors.As(err, &exitErr) {
+				return cli.Exit("", exitErr.Code)
+			}
+
+			return err
+		},
+	}
+}
+
+func defaultBashPath() string {
+	if p, err := lockrunner.FindBashPath(""); err == nil {
+		return p
+	}
+	if runtime.GOOS == "windows" {
+		return "C:\\Program Files\\Git\\bin\\bash.exe"
+	}
+
+	return "/bin/bash"
+}

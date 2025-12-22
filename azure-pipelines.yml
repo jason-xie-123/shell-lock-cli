@@ -1,44 +1,94 @@
-pool:
-  vmImage: 'macOS-14'
+trigger:
+- main
 
-steps:
-- task: CmdLine@2
-  inputs:
-    script: '"$(System.DefaultWorkingDirectory)/scripts/config/gh-config.sh" -token $(ENV_GH_TOKEN)'
-  displayName: config gh
+pr:
+- main
 
-- task: GoTool@0
-  inputs:
-    version: '1.24.11'
+stages:
+- stage: Test
+  displayName: Run Go Tests (matrix)
+  jobs:
+  - job: test_matrix
+    displayName: Go test on $(vmImage)
+    strategy:
+      matrix:
+        linux:
+          vmImage: 'ubuntu-latest'
+        macos:
+          vmImage: 'macOS-14'
+        windows:
+          vmImage: 'windows-latest'
+    pool:
+      vmImage: $(vmImage)
+    steps:
+    - task: GoTool@0
+      displayName: Setup Go
+      inputs:
+        version: '1.24.11'
 
-- task: CmdLine@2
-  inputs:
-    script: '"$(System.DefaultWorkingDirectory)/scripts/build/clean-build-cache.sh"'
-  displayName: clean build cache
+    - task: CmdLine@2
+      displayName: Run unit tests with race + coverage
+      inputs:
+        script: |
+          go version
+          cd shell-lock-cli
+          go test ./... -race -count=1 -cover -coverprofile=coverage.out
 
-- task: CmdLine@2
-  inputs:
-    script: '"$(System.DefaultWorkingDirectory)/scripts/build/build.sh"'
-  displayName: build export
+    - task: PublishBuildArtifacts@1
+      displayName: Publish coverage artifact
+      inputs:
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/shell-lock-cli/coverage.out'
+        ArtifactName: 'coverage-$(vmImage)'
+        PublishLocation: Container
 
-- task: CmdLine@2
-  inputs:
-    script: '"$(System.DefaultWorkingDirectory)/scripts/build/compress-release.sh"'
-  displayName: compress release
+- stage: Release
+  displayName: Build and Release
+  dependsOn: Test
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - job: release_macos
+    displayName: Build and upload release (macOS)
+    pool:
+      vmImage: 'macOS-14'
+    steps:
+    - task: CmdLine@2
+      displayName: config gh
+      inputs:
+        script: '"$(System.DefaultWorkingDirectory)/scripts/config/gh-config.sh" -token $(ENV_GH_TOKEN)'
 
-- task: CmdLine@2
-  inputs:
-    script: '"$(System.DefaultWorkingDirectory)/scripts/upload/upload-to-github.sh"'
-  displayName: upload release
+    - task: GoTool@0
+      displayName: Setup Go
+      inputs:
+        version: '1.24.11'
 
-- task: CmdLine@2
-  inputs:
-    script: 'cp -r "$(System.DefaultWorkingDirectory)/release" "$(Build.artifactStagingDirectory)"'
-  displayName: Copying releases to Artifacts Directory
+    - task: CmdLine@2
+      displayName: clean build cache
+      inputs:
+        script: '"$(System.DefaultWorkingDirectory)/scripts/build/clean-build-cache.sh"'
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Uploading Artifacts Directory for the Current Run'
-  inputs:
-    PathtoPublish: '$(Build.artifactStagingDirectory)'
-    ArtifactName: 'GeneratedResult'
-    PublishLocation: Container
+    - task: CmdLine@2
+      displayName: build export
+      inputs:
+        script: '"$(System.DefaultWorkingDirectory)/scripts/build/build.sh"'
+
+    - task: CmdLine@2
+      displayName: compress release
+      inputs:
+        script: '"$(System.DefaultWorkingDirectory)/scripts/build/compress-release.sh"'
+
+    - task: CmdLine@2
+      displayName: upload release
+      inputs:
+        script: '"$(System.DefaultWorkingDirectory)/scripts/upload/upload-to-github.sh"'
+
+    - task: CmdLine@2
+      displayName: Copying releases to Artifacts Directory
+      inputs:
+        script: 'cp -r "$(System.DefaultWorkingDirectory)/release" "$(Build.artifactStagingDirectory)"'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Uploading Artifacts Directory for the Current Run'
+      inputs:
+        PathtoPublish: '$(Build.artifactStagingDirectory)'
+        ArtifactName: 'GeneratedResult'
+        PublishLocation: Container

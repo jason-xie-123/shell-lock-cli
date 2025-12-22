@@ -1,115 +1,63 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-OLD_PWD=$(pwd)
-SHELL_FOLDER=$(
-    cd "$(dirname "$0")" || exit
-    pwd
-)
-PROJECT_FOLDER=$SHELL_FOLDER/..
+set -euo pipefail
 
-cd "$SHELL_FOLDER" || exit >/dev/null 2>&1
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+cd "$SCRIPT_DIR"
 
 # shellcheck source=/dev/null
-source "$PROJECT_FOLDER/scripts/base/env.sh"
-PROJECT_FOLDER=$(calc_real_path "$PROJECT_FOLDER")
-
-process() {
-    COMMAND="\"$PROJECT_FOLDER/scripts/build/clean-build-cache.sh\""
-    echo exec: "$COMMAND"
-    if ! eval "$COMMAND"; then
-        echo ""
-        echo ""
-        echo "[ERROR]: failed to clean build cache"
-        echo ""
-        echo ""
-
-        exit 1
-    fi
-
-    COMMAND="\"$PROJECT_FOLDER/scripts/build/build.sh\""
-    echo exec: "$COMMAND"
-    if ! eval "$COMMAND"; then
-        echo ""
-        echo ""
-        echo "[ERROR]: failed to build export"
-        echo ""
-        echo ""
-
-        exit 1
-    fi
-
-    if [ "$IS_SUPPORT_COMPRESS_RELEASE" = "true" ]; then
-        COMMAND="\"$PROJECT_FOLDER/scripts/build/compress-release.sh\""
-        echo exec: "$COMMAND"
-        if ! eval "$COMMAND"; then
-            echo ""
-            echo ""
-            echo "[ERROR]: failed to compress release"
-            echo ""
-            echo ""
-
-            exit 1
-        fi
-    fi
-
-    if [ "$IS_SUPPORT_UPLOAD_TO_GITHUB" = "true" ]; then
-        COMMAND="\"$PROJECT_FOLDER/scripts/upload/upload-to-github.sh\""
-        echo exec: "$COMMAND"
-        if ! eval "$COMMAND"; then
-            echo ""
-            echo ""
-            echo "[ERROR]: failed to upload to GitHub"
-            echo ""
-            echo ""
-
-            exit 1
-        fi
-    fi
-}
-
-usage() {
-    echo "Usage:"
-    echo "  $(basename "$0") [--flag-compress-release] [--flag-upload-to-github] [-h]"
-    echo ""
-    echo "Description:"
-    echo "  --flag-compress-release: whether to compress the release binaries, default is false"
-    echo "  --flag-upload-to-github: whether to upload the release to GitHub Releases, default is false"
-    echo ""
-    echo "Example:"
-    echo "  $(basename "$0") --flag-compress-release --flag-upload-to-github"
-
-    exit 1
-}
+source "$PROJECT_ROOT/scripts/base/env.sh"
 
 IS_SUPPORT_COMPRESS_RELEASE="false"
 IS_SUPPORT_UPLOAD_TO_GITHUB="false"
-while true; do
-    if [ -z "$1" ]; then
-        break
+
+usage() {
+    cat <<'USAGE'
+Usage:
+  local-build.sh [--flag-compress-release] [--flag-upload-to-github] [-h]
+
+Description:
+  --flag-compress-release  Compress the release binaries (default: false)
+  --flag-upload-to-github  Upload release artifacts to GitHub (default: false)
+USAGE
+    exit 1
+}
+
+process_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        -h | --h | h | -help | --help | help | -H | --H | HELP)
+            usage
+            ;;
+        --flag-compress-release)
+            IS_SUPPORT_COMPRESS_RELEASE="true"
+            ;;
+        --flag-upload-to-github)
+            IS_SUPPORT_UPLOAD_TO_GITHUB="true"
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            usage
+            ;;
+        esac
+        shift
+    done
+}
+
+process_steps() {
+    run_command_or_fail "\"$PROJECT_ROOT/scripts/build/clean-build-cache.sh\"" "Failed to clean build cache"
+    run_command_or_fail "\"$PROJECT_ROOT/scripts/build/build.sh\"" "Failed to build binaries"
+
+    if [[ $IS_SUPPORT_COMPRESS_RELEASE == "true" ]]; then
+        run_command_or_fail "\"$PROJECT_ROOT/scripts/build/compress-release.sh\"" "Failed to compress release"
     fi
 
-    case "$1" in
-    -h | --h | h | -help | --help | help | -H | --H | HELP)
-        usage
-        ;;
-    --flag-compress-release)
-        IS_SUPPORT_COMPRESS_RELEASE="true"
-        shift 1
-        ;;
-    --flag-upload-to-github)
-        IS_SUPPORT_UPLOAD_TO_GITHUB="true"
-        shift 1
-        ;;
-    *)
-        echo ""
-        echo "unknown option: $1"
-        echo ""
+    if [[ $IS_SUPPORT_UPLOAD_TO_GITHUB == "true" ]]; then
+        run_command_or_fail "\"$PROJECT_ROOT/scripts/upload/upload-to-github.sh\"" "Failed to upload to GitHub"
+    fi
+}
 
-        usage
-        ;;
-    esac
-done
-
-process
-
-cd "$OLD_PWD" || exit >/dev/null 2>&1
+process_args "$@"
+process_steps

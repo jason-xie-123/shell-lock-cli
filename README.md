@@ -11,10 +11,10 @@ From the repository root:
 
 ```bash
 # Build to the local bin directory
-GO111MODULE=on go build -o bin/shell-lock-cli ./shell-lock-cli
+GO111MODULE=on go build -o bin/shell-lock-cli ./shell-lock-cli/cmd/shell-lock-cli
 
 # Or install to GOPATH/bin (ensure GOPATH/bin is on PATH)
-GO111MODULE=on go install ./shell-lock-cli
+GO111MODULE=on go install ./shell-lock-cli/cmd/shell-lock-cli
 ```
 
 ## Usage
@@ -56,4 +56,9 @@ Common examples:
 - Lock acquisition failures or missing/invalid parameters exit with a non-zero status.
 
 ## Version
-Current version: `0.1.0`, stored in `shell-lock-cli/version/version.go` and available via `--version`.
+Current version: `0.1.0` (also available via the `--version` flag).
+
+## Project layout
+- [shell-lock-cli/cmd/shell-lock-cli](shell-lock-cli/cmd/shell-lock-cli): CLI entry point.
+- [shell-lock-cli/internal/lockrunner](shell-lock-cli/internal/lockrunner): lock acquisition and command execution logic.
+- [scripts](scripts): helper scripts for building, packaging, and releases.
