@@ -51,5 +51,5 @@ check_jq_exist
 
 [[ -n "$GH_TOKEN" ]] || fail "GH_TOKEN is required."
 
-run_command_or_fail "echo \"$GH_TOKEN\" | gh auth login --with-token" "Failed to login with token"
+run_command_or_fail "echo \"$GH_TOKEN\" | gh auth login --with-token" "Failed to login with token" "true"
 run_command_or_fail "GH_PAGER='' gh api user | jq ." "Failed to get gh user info"

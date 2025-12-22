@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# 快速测试脚本 - 运行所有新增测试的快速子集
+# Quick test script - run quick subset of all new tests
 
 set -euo pipefail
 
@@ -16,7 +16,7 @@ NC='\033[0m'
 PASSED=0
 FAILED=0
 
-echo -e "${YELLOW}=== 快速测试新增功能 ===${NC}\n"
+echo -e "${YELLOW}=== Quick Test for New Features ===${NC}\n"
 
 run_quick_test() {
     local test_name="$1"
@@ -33,7 +33,7 @@ run_quick_test() {
     fi
 }
 
-# 测试新增的核心功能
+# Test newly added core functionality
 run_quick_test "Version Flag" "test_version_flag"
 run_quick_test "Help Flag" "test_help_flag"
 run_quick_test "Invalid Arguments" "test_invalid_arguments"

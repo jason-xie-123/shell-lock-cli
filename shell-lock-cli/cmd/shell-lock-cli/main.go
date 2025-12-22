@@ -56,9 +56,20 @@ func newApp() *cli.App {
 			},
 		},
 		Action: func(c *cli.Context) error {
+			// Validate required flags
+			command := c.String("command")
+			lockFile := c.String("lock-file")
+
+			if command == "" {
+				return cli.Exit("Error: command flag is required and cannot be empty", 1)
+			}
+			if lockFile == "" {
+				return cli.Exit("Error: lock-file flag is required and cannot be empty", 1)
+			}
+
 			err := lockrunner.Run(lockrunner.Options{
-				Command:  c.String("command"),
-				LockFile: c.String("lock-file"),
+				Command:  command,
+				LockFile: lockFile,
 				TryLock:  c.Bool("try-lock"),
 				BashPath: c.String("bash-path"),
 				Stdout:   os.Stdout,
