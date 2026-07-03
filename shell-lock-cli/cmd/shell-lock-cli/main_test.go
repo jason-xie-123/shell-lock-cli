@@ -87,7 +87,7 @@ func TestCLI_ExitCodePropagation(t *testing.T) {
 	lock := filepath.Join(t.TempDir(), "x.lock")
 	args := []string{"shell-lock-cli", "--command", "exit 9", "--lock-file", lock, "--bash-path", bashPathForTests(t)}
 	orig := cli.OsExiter
-	var got int = -1
+	got := -1
 	cli.OsExiter = func(code int) { got = code }
 	defer func() { cli.OsExiter = orig }()
 
