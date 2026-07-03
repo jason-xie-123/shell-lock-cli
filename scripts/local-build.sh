@@ -11,16 +11,17 @@ cd "$SCRIPT_DIR"
 source "$PROJECT_ROOT/scripts/base/env.sh"
 
 IS_SUPPORT_COMPRESS_RELEASE="false"
-IS_SUPPORT_UPLOAD_TO_GITHUB="false"
 
 usage() {
     cat <<'USAGE'
 Usage:
-  local-build.sh [--flag-compress-release] [--flag-upload-to-github] [-h]
+  local-build.sh [--flag-compress-release] [-h]
 
 Description:
   --flag-compress-release  Compress the release binaries (default: false)
-  --flag-upload-to-github  Upload release artifacts to GitHub (default: false)
+
+Note: publishing to GitHub Releases is handled by .github/workflows/release.yml
+on tag push, not by this script.
 USAGE
     exit 1
 }
@@ -33,9 +34,6 @@ process_args() {
             ;;
         --flag-compress-release)
             IS_SUPPORT_COMPRESS_RELEASE="true"
-            ;;
-        --flag-upload-to-github)
-            IS_SUPPORT_UPLOAD_TO_GITHUB="true"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -52,10 +50,6 @@ process_steps() {
 
     if [[ $IS_SUPPORT_COMPRESS_RELEASE == "true" ]]; then
         run_command_or_fail "\"$PROJECT_ROOT/scripts/build/compress-release.sh\"" "Failed to compress release"
-    fi
-
-    if [[ $IS_SUPPORT_UPLOAD_TO_GITHUB == "true" ]]; then
-        run_command_or_fail "\"$PROJECT_ROOT/scripts/upload/upload-to-github.sh\"" "Failed to upload to GitHub"
     fi
 }
 

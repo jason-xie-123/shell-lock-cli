@@ -67,17 +67,17 @@ func Run(opts Options) error {
 		}
 
 		if !acquired {
-			fmt.Fprintln(stdout, "[WARN] failed to acquire lock, another process is holding the lock...")
+			_, _ = fmt.Fprintln(stdout, "[WARN] failed to acquire lock, another process is holding the lock...")
 			return nil
 		}
 
-		defer fileLock.Unlock()
+		defer func() { _ = fileLock.Unlock() }()
 	} else {
 		if err := fileLock.Lock(); err != nil {
 			return fmt.Errorf("failed to acquire lock: %w", err)
 		}
 
-		defer fileLock.Unlock()
+		defer func() { _ = fileLock.Unlock() }()
 	}
 
 	cmd := exec.Command(bashPath, "-c", opts.Command)

@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"shell-lock-cli/internal/lockrunner"
-	packageVersion "shell-lock-cli/version"
+	packageVersion "shell-lock-cli/internal/version"
 
 	"github.com/urfave/cli/v2"
 )
