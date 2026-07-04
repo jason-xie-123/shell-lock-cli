@@ -328,7 +328,7 @@ check_windows_os_info_exist() {
         log_warn "Missing windows-os-info command, downloading binary"
 
         local download_url="https://github.com/jason-xie-123/windows-os-info/releases/download/v0.1.1/windows-os-info.exe"
-        local expected_checksum="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # SHA256 checksum of the binary
+        local expected_checksum="9030bc5862b7efe079d5a169115ab85581fc5f415c2d89c3e9d3db26420b6ea3"  # SHA256 checksum of the binary
         local download_file="windows-os-info.exe"
         local current_script_dir
         current_script_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
